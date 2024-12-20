@@ -1,28 +1,30 @@
 import 'dart:convert';
-// import 'dart:developer';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
+import 'package:my_memberlink_app/model/myevent.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 
-class NewEventScreen extends StatefulWidget {
-  const NewEventScreen({super.key});
+class EditEventScreen extends StatefulWidget {
+  final MyEvent myevent;
+
+  const EditEventScreen({super.key, required this.myevent});
 
   @override
-  State<NewEventScreen> createState() => _NewEventScreenState();
+  State<EditEventScreen> createState() => _EditEventScreenState();
 }
 
-class _NewEventScreenState extends State<NewEventScreen> {
+class _EditEventScreenState extends State<EditEventScreen> {
   String startDateTime = "", endDateTime = "";
   String eventtypevalue = 'Conference';
   var selectedStartDateTime, selectedEndDateTime;
 
   var items = [
     'Conference',
-    'Exibition',
+    'Exhibition',
     'Seminar',
     'Hackathon',
   ];
@@ -36,12 +38,28 @@ class _NewEventScreenState extends State<NewEventScreen> {
   TextEditingController locationController = TextEditingController();
 
   @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    titleController.text = widget.myevent.eventTitle.toString();
+    descriptionController.text = widget.myevent.eventDescription.toString();
+    locationController.text = widget.myevent.eventLocation.toString();
+    eventtypevalue = widget.myevent.eventType.toString();
+    var formatter = DateFormat('dd-MM-yyyy hh:mm a');
+    // String formattedDate = formatter.format(selectedStartDateTime);
+    startDateTime = formatter
+        .format(DateTime.parse(widget.myevent.eventStartdate.toString()));
+    endDateTime = formatter
+        .format(DateTime.parse(widget.myevent.eventEnddate.toString()));
+  }
+
+  @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
         appBar: AppBar(
-          title: const Text("New Event"),
+          title: const Text("Edit Event"),
         ),
         body: SingleChildScrollView(
             padding: const EdgeInsets.all(8.0),
@@ -57,10 +75,10 @@ class _NewEventScreenState extends State<NewEventScreen> {
                       child: Container(
                           decoration: BoxDecoration(
                             image: DecorationImage(
-                                fit: BoxFit.contain,
+                                fit: BoxFit.fill,
                                 image: _image == null
-                                    ? const AssetImage(
-                                        "assets/images/camera.png")
+                                    ? NetworkImage(
+                                        "${MyConfig.servername}/my_memberlink_app/assets/events/${widget.myevent.eventFilename}")
                                     : FileImage(_image!) as ImageProvider),
                             borderRadius: BorderRadius.circular(10),
                             color: Colors.grey.shade200,
@@ -221,26 +239,19 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           print("STILL HERE");
                           return;
                         }
-                        if (_image == null) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content: Text("Please take a photo"),
-                            backgroundColor: Colors.red,
-                          ));
-                          return;
-                        }
-                        double filesize = getFileSize(_image!);
-                        print(filesize);
+                        if (_image != null) {
+                          double filesize = getFileSize(_image!);
+                          print(filesize);
 
-                        if (filesize > 100) {
-                          ScaffoldMessenger.of(context)
-                              .showSnackBar(const SnackBar(
-                            content: Text("Image size too large"),
-                            backgroundColor: Colors.red,
-                          ));
-                          return;
+                          if (filesize > 100) {
+                            ScaffoldMessenger.of(context)
+                                .showSnackBar(const SnackBar(
+                              content: Text("Image size too large"),
+                              backgroundColor: Colors.red,
+                            ));
+                            return;
+                          }
                         }
-
                         if (startDateTime == "" || endDateTime == "") {
                           ScaffoldMessenger.of(context)
                               .showSnackBar(const SnackBar(
@@ -250,7 +261,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           return;
                         }
 
-                        insertEventDialog();
+                        updateEventDialog();
                       },
                       minWidth: screenWidth,
                       height: 50,
@@ -258,7 +269,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                           .colorScheme
                           .secondary, // Uses primary color from theme
                       child: Text(
-                        "Insert",
+                        "Update",
                         style: TextStyle(
                           color: Theme.of(context)
                               .colorScheme
@@ -378,14 +389,14 @@ class _NewEventScreenState extends State<NewEventScreen> {
     return sizeInKB;
   }
 
-  void insertEventDialog() {
+  void updateEventDialog() {
     showDialog(
         context: context,
         builder: (BuildContext context) {
           // return object of type Dialog
           return AlertDialog(
             title: const Text(
-              "Insert Event",
+              "Update Event",
               style: TextStyle(),
             ),
             content: const Text("Are you sure?", style: TextStyle()),
@@ -396,7 +407,7 @@ class _NewEventScreenState extends State<NewEventScreen> {
                   style: TextStyle(),
                 ),
                 onPressed: () {
-                  insertEvent();
+                  updateEvent();
                   Navigator.of(context).pop();
                 },
               ),
@@ -412,28 +423,42 @@ class _NewEventScreenState extends State<NewEventScreen> {
         });
   }
 
-  void insertEvent() {
+  void updateEvent() {
+    String image;
     String title = titleController.text;
     String location = locationController.text;
     String description = descriptionController.text;
     String start = selectedStartDateTime.toString();
     String end = selectedEndDateTime.toString();
-    String image = base64Encode(_image!.readAsBytesSync());
+    if (_image == null) {
+      image = "NA";
+    } else {
+      image = base64Encode(_image!.readAsBytesSync());
+    }
+
+    if (start == "null") {
+      start = "NA";
+    }
+    if (end == "null") {
+      end = "NA";
+    }
     // log(image);
     http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/insert_event.php"),
+        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/update_event.php"),
         body: {
+          "eventid": widget.myevent.eventId.toString(),
           "title": title,
           "location": location,
           "description": description,
           "eventtype": eventtypevalue,
           "start": start,
           "end": end,
+          "filename":widget.myevent.eventFilename,
           "image": image
         }).then((response) {
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        // log(response.body);
+         var data = jsonDecode(response.body);
+        //  log(response.body);
         if (data['status'] == "success") {
           Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(

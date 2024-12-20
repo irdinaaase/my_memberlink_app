@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'views/auth/splash_screen.dart';
-
 void main() {
+    WidgetsFlutterBinding.ensureInitialized();
   runApp(const MainApp());
 }
 

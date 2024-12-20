@@ -1,7 +1,7 @@
 name: my_memberlink_app
 description: "A new Flutter project."
-publish_to: 'none'
-version: 0.1.0
+publish_to: 'none' # Prevents publication to pub.dev
+version: 0.1.0 # Semantic versioning: major.minor.patch
 
 environment:
   sdk: ^3.5.4
@@ -11,13 +11,16 @@ dependencies:
     sdk: flutter
   http: ^1.2.2
   image_cropper: ^8.0.2
-  image_picker: ^1.1.2
+  image_picker: ^1.1.2 
+  path_provider: ^2.1.5
   intl: ^0.19.0
   shared_preferences: ^2.3.3
+  path: 1.9.0
   email_otp: ^3.0.2
   lottie: ^2.0.0
-  video_player: ^2.3.0  # Make sure to use the latest version available
-
+  video_player: ^2.3.0
+  permission_handler: ^10.0.0 
+  flutter_image_compress: ^2.3.0
 
 
 dev_dependencies:
@@ -27,10 +30,14 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+
+  # Asset directories
   assets:
     - assets/images/
+    - assets/products/
     - assets/animations/
 
+  # Custom fonts
   fonts:
     - family: Cinzel
       fonts:
@@ -38,4 +45,6 @@ flutter:
     - family: Quicksand
       fonts:
         - asset: assets/fonts/Quicksand-VariableFont_wght.ttf
-    
+    - family: magic_school
+      fonts:
+        - asset: assets/fonts/MagicSchoolOne.ttf

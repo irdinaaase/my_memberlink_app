@@ -15,7 +15,7 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    Future.delayed(const Duration(seconds: 10), () {
+    Future.delayed(const Duration(seconds: 6), () {
       Navigator.pushReplacement(context,
           MaterialPageRoute(builder: (context) => const LoginScreen()));
     });
@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen> {
                     fontWeight: FontWeight.bold,
                     color: Colors.amber[200],
                     fontFamily: 'Cinzel',
-                    shadows: [
+                    shadows: const [
                       Shadow(
                         offset: Offset(3, 3),
                         blurRadius: 10,

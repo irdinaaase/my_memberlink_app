@@ -1,7 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_memberlink_app/myconfig.dart';
@@ -26,56 +23,98 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("New Newsletter"),
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            TextField(
-                controller: titleController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    hintText: "News Title")),
-            const SizedBox(
-              height: 10,
-            ),
-            SizedBox(
-              height: screenHeight * 0.7,
-              child: TextField(
-                controller: detailsController,
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(10)),
-                    ),
-                    hintText: "News Details"),
-                maxLines: screenHeight ~/ 35,
-              ),
-            ),
-            const SizedBox(
-              height: 20,
-            ),
-            MaterialButton(
-              elevation: 10,
-              onPressed: onInsertNewsDialog,
-              minWidth: screenWidth,
-              height: 50,
-              color: Theme.of(context)
-                  .colorScheme
-                  .secondary, // Uses primary color from theme
-              child: Text(
-                "Insert",
-                style: TextStyle(
-                  color: Theme.of(context)
-                      .colorScheme
-                      .onSecondary, // Text color matches onPrimary color
-                ),
-              ),
-            ),
-          ],
+        title: const Text(
+          "The Hogwarts Quill",
+          style: TextStyle(
+            fontFamily: 'HarryPotter',
+            fontSize: 24,
+            color: Colors.yellow,
+          ),
         ),
+        backgroundColor: Colors.brown[800],
+      ),
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/hogwarts_castle.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Foreground Content
+          SingleChildScrollView(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                const Text(
+                  "Create a Magical Newsletter",
+                  style: TextStyle(
+                    fontFamily: 'Cinzel',
+                    fontSize: 22,
+                    color: Color.fromARGB(255, 243, 242, 242),
+                  ),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: titleController,
+                  decoration: InputDecoration(
+                    labelText: "Enter Your Scroll Title",
+                    labelStyle: const TextStyle(
+                      fontFamily: 'Serif',
+                      color: Colors.brown,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(color: Colors.brown.shade700),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.8),
+                  ),
+                ),
+                const SizedBox(height: 15),
+                TextField(
+                  controller: detailsController,
+                  decoration: InputDecoration(
+                    labelText: "Detail Your Magical Thoughts",
+                    labelStyle: const TextStyle(
+                      fontFamily: 'Serif',
+                      color: Colors.brown,
+                    ),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(15),
+                      borderSide: BorderSide(color: Colors.brown.shade700),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white.withOpacity(0.8),
+                  ),
+                  maxLines: 15,
+                ),
+                const SizedBox(height: 20),
+                MaterialButton(
+                  elevation: 10,
+                  onPressed: onInsertNewsDialog,
+                  minWidth: screenWidth,
+                  height: 50,
+                  color: Colors.brown[800],
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Text(
+                    "Publish Scroll",
+                    style: TextStyle(
+                      fontFamily: 'HarryPotter',
+                      fontSize: 18,
+                      color: Colors.yellow,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -83,7 +122,8 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
   void onInsertNewsDialog() {
     if (titleController.text.isEmpty || detailsController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Please enter title and details"),
+        content: Text("Complete the scroll before publishing!"),
+        backgroundColor: Colors.red,
       ));
       return;
     }
@@ -92,17 +132,25 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
       builder: (BuildContext context) {
         return AlertDialog(
           shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(20.0))),
-          title: const Text(
-            "Insert this newsletter?",
-            style: TextStyle(),
+            borderRadius: BorderRadius.all(Radius.circular(20.0)),
           ),
-          content: const Text("Are you sure?", style: TextStyle()),
+          title: const Text(
+            "Publish Magical Scroll?",
+            style: TextStyle(
+              fontFamily: 'Serif',
+              fontSize: 18,
+              color: Colors.brown,
+            ),
+          ),
+          content: const Text(
+            "Do you wish to enchant this scroll for everyone?",
+            style: TextStyle(fontFamily: 'Serif', fontSize: 16),
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text(
-                "Yes",
-                style: TextStyle(),
+                "Yes (Wingardium Leviosa)",
+                style: TextStyle(color: Colors.green),
               ),
               onPressed: () {
                 insertNews();
@@ -111,15 +159,11 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
             ),
             TextButton(
               child: const Text(
-                "No",
-                style: TextStyle(),
+                "No (Nox)",
+                style: TextStyle(color: Colors.red),
               ),
               onPressed: () {
                 Navigator.of(context).pop();
-                // ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                //   content: Text("Registration Canceled"),
-                //   backgroundColor: Colors.red,
-                // ));
               },
             ),
           ],
@@ -132,19 +176,19 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
     String title = titleController.text;
     String details = detailsController.text;
     http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/insert_news.php"),
-        body: {"title": title, "details": details}).then((response) {
+      Uri.parse("${MyConfig.servername}/my_memberlink_app/api/insert_news.php"),
+      body: {"title": title, "details": details},
+    ).then((response) {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);
         if (data['status'] == "success") {
-          Navigator.pop(context);
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Insert Success"),
+            content: Text("Scroll Published Successfully!"),
             backgroundColor: Colors.green,
           ));
         } else {
           ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Insert Failed"),
+            content: Text("Failed to Publish the Scroll!"),
             backgroundColor: Colors.red,
           ));
         }

@@ -1,7 +1,4 @@
-// ignore_for_file: use_build_context_synchronously
-
 import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:my_memberlink_app/model/news.dart';
 import 'package:http/http.dart' as http;
@@ -21,13 +18,13 @@ class _EditNewsState extends State<EditNewsScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     titleController.text = widget.news.newsTitle.toString();
     detailsController.text = widget.news.newsDetails.toString();
   }
 
   late double screenWidth, screenHeight;
+
   @override
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
@@ -35,76 +32,152 @@ class _EditNewsState extends State<EditNewsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Edit Newsletter"),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            children: [
-              TextField(
-                  controller: titleController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      hintText: "News Title")),
-              const SizedBox(
-                height: 10,
-              ),
-              SizedBox(
-                height: screenHeight * 0.7,
-                child: TextField(
-                  controller: detailsController,
-                  decoration: const InputDecoration(
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.all(Radius.circular(10)),
-                      ),
-                      hintText: "News Details"),
-                  maxLines: screenHeight ~/ 35,
-                ),
-              ),
-              const SizedBox(
-                height: 20,
-              ),
-              MaterialButton(
-                  elevation: 10,
-                  onPressed: onUpdateNewsDialog,
-                  minWidth: screenWidth,
-                  height: 50,
-                  color: Theme.of(context).colorScheme.secondary,
-                  // color: Colors.blueAccent,
-                  child: const Text("Update News",
-                      style: TextStyle(color: Colors.white))),
-            ],
+        title: const Text(
+          "Edit Scroll",
+          style: TextStyle(
+            fontFamily: 'HarryPotter',
+            fontSize: 22,
+            color: Colors.yellow,
           ),
         ),
+        backgroundColor: Colors.brown[800],
+      ),
+      body: Stack(
+        children: [
+          // Background Image
+          Container(
+            decoration: const BoxDecoration(
+              image: DecorationImage(
+                image: AssetImage("assets/images/hogwarts_castle.jpg"),
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          // Content on top of the image
+          SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                children: [
+                  const Text(
+                    "Modify Your Scroll",
+                    style: TextStyle(
+                      fontFamily: 'HarryPotter',
+                      fontSize: 20,
+                      color: Colors.yellow,
+                      shadows: [
+                        Shadow(
+                          offset: Offset(2, 2),
+                          blurRadius: 4,
+                          color: Colors.black,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: titleController,
+                    decoration: InputDecoration(
+                      labelText: "Modify Your Scroll Title",
+                      labelStyle: const TextStyle(
+                        fontFamily: 'Serif',
+                        color: Colors.brown,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: Colors.brown.shade700),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.8),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                  TextField(
+                    controller: detailsController,
+                    decoration: InputDecoration(
+                      labelText: "Refine Your Magical Thoughts",
+                      labelStyle: const TextStyle(
+                        fontFamily: 'Serif',
+                        color: Colors.brown,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        borderSide: BorderSide(color: Colors.brown.shade700),
+                      ),
+                      filled: true,
+                      fillColor: Colors.white.withOpacity(0.8),
+                    ),
+                    maxLines: screenHeight ~/ 35,
+                  ),
+                  const SizedBox(height: 20),
+                  MaterialButton(
+                    elevation: 10,
+                    onPressed: onUpdateNewsDialog,
+                    minWidth: screenWidth,
+                    height: 50,
+                    color: Colors.brown[800],
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: const Text(
+                      "Update Enchantment",
+                      style: TextStyle(
+                        fontFamily: 'HarryPotter',
+                        fontSize: 18,
+                        color: Colors.yellow,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
   void onUpdateNewsDialog() {
     showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text("Update News?"),
-            content: const Text("Are you sure you want to update this news?"),
-            actions: [
-              TextButton(
-                  onPressed: () {
-                    updateNews();
-                    Navigator.pop(context);
-                  },
-                  child: const Text("Yes")),
-              TextButton(
-                  onPressed: () {
-                    Navigator.pop(context);
-                  },
-                  child: const Text("No"))
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text(
+            "Charm Your Scroll?",
+            style: TextStyle(
+              fontFamily: 'Serif',
+              fontSize: 18,
+              color: Colors.brown,
+            ),
+          ),
+          content: const Text(
+            "Do you wish to enchant this scroll for all?",
+            style: TextStyle(fontFamily: 'Serif', fontSize: 16),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                updateNews();
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "Yes (Alohomora)",
+                style: TextStyle(color: Colors.green),
+              ),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text(
+                "No (Nox)",
+                style: TextStyle(color: Colors.red),
+              ),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   void updateNews() {
@@ -112,27 +185,27 @@ class _EditNewsState extends State<EditNewsScreen> {
     String details = detailsController.text.toString();
 
     http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/update_news.php"),
-        body: {
-          "newsid": widget.news.newsId.toString(),
-          "title": title,
-          "details": details
-        }).then((response) {
-          if (response.statusCode == 200) {
-            var data = jsonDecode(response.body);
-            if (data['status'] == "success") {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("Update Success"),
-                backgroundColor: Colors.green,
-              ));
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                content: Text("Update Failed"),
-                backgroundColor: Colors.red,
-              ));
-            }
-          }
-        });
+      Uri.parse("${MyConfig.servername}/my_memberlink_app/api/update_news.php"),
+      body: {
+        "newsid": widget.news.newsId.toString(),
+        "title": title,
+        "details": details,
+      },
+    ).then((response) {
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if (data['status'] == "success") {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Scroll Updated Successfully!"),
+            backgroundColor: Colors.green,
+          ));
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text("Failed to Update the Scroll!"),
+            backgroundColor: Colors.red,
+          ));
+        }
+      }
+    });
   }
 }

@@ -17,9 +17,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   TextEditingController lastnameController = TextEditingController();
   TextEditingController phoneController = TextEditingController();
   TextEditingController addressController = TextEditingController();
-  TextEditingController otpController = TextEditingController();
 
-  bool isOTPSent = false;
   bool passwordVisible = true;
   bool isLoading = false;
   String? selectedTitle;
@@ -31,7 +29,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         children: [
           // Background image with a gradient overlay
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/portal.png'),
                 fit: BoxFit.cover,
@@ -74,7 +72,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             fontFamily: 'Cinzel',
                             shadows: [
                               Shadow(
-                                offset: Offset(3, 3),
+                                offset: const Offset(3, 3),
                                 blurRadius: 8,
                                 color: Colors.black.withOpacity(0.7),
                               ),
@@ -88,17 +86,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         const SizedBox(height: 10),
                         _buildTextField(lastnameController, "Last Name"),
                         const SizedBox(height: 10),
-                        _buildTextField(phoneController, "Phone Number", keyboardType: TextInputType.phone),
+                        _buildTextField(phoneController, "Phone Number",
+                            keyboardType: TextInputType.phone),
                         const SizedBox(height: 10),
-                        _buildTextField(addressController, "Address", keyboardType: TextInputType.streetAddress),
+                        _buildTextField(addressController, "Address",
+                            keyboardType: TextInputType.streetAddress),
                         const SizedBox(height: 10),
-                        _buildTextField(emailController, "Your Email", keyboardType: TextInputType.emailAddress),
+                        _buildTextField(emailController, "Your Email",
+                            keyboardType: TextInputType.emailAddress),
                         const SizedBox(height: 10),
                         _buildPasswordField(),
-                        if (isOTPSent) ...[
-                          const SizedBox(height: 10),
-                          _buildTextField(otpController, "Enter OTP", keyboardType: TextInputType.number),
-                        ],
                         const SizedBox(height: 20),
                         isLoading
                             ? const CircularProgressIndicator()
@@ -133,7 +130,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         fillColor: Colors.black.withOpacity(0.5),
         hintText: "Choose Your Title",
         hintStyle: TextStyle(color: Colors.grey[400]),
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         prefixIcon: Icon(Icons.person, color: Colors.amber[200]),
@@ -141,17 +138,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hintText, {TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField(TextEditingController controller, String hintText,
+      {TextInputType keyboardType = TextInputType.text}) {
     return TextField(
       controller: controller,
       keyboardType: keyboardType,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.black.withOpacity(0.5),
         hintText: hintText,
         hintStyle: TextStyle(color: Colors.grey[400]),
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         prefixIcon: Icon(Icons.text_fields, color: Colors.amber[200]),
@@ -163,13 +161,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return TextField(
       obscureText: passwordVisible,
       controller: passwordController,
-      style: TextStyle(color: Colors.white),
+      style: const TextStyle(color: Colors.white),
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.black.withOpacity(0.5),
         hintText: "Your Password",
         hintStyle: TextStyle(color: Colors.grey[400]),
-        border: OutlineInputBorder(
+        border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
         prefixIcon: Icon(Icons.lock, color: Colors.amber[200]),
@@ -191,14 +189,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
   Widget _buildActionButton() {
     return MaterialButton(
       elevation: 10,
-      onPressed: isOTPSent ? verifyOTPAndRegister : sendOTP,
+      onPressed: userRegistration,
       minWidth: double.infinity,
       height: 50,
       color: Colors.deepPurple[800],
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-      child: Text(
-        isOTPSent ? "Verify & Register" : "Send OTP",
-        style: const TextStyle(color: Colors.white, fontSize: 18),
+      child: const Text(
+        "Register",
+        style: TextStyle(color: Colors.white, fontSize: 18),
       ),
     );
   }
@@ -218,95 +216,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  void sendOTP() async {
-    String email = emailController.text;
-
-    if (email.isEmpty || !isValidEmail(email)) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Enter a valid email"),
-        backgroundColor: Colors.red,
-      ));
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final response = await http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/otp_verifications.php"),
-        body: {
-          'action': 'send_otp',
-          'email': email,
-        },
-      );
-
-      setState(() {
-        isLoading = false;
-      });
-
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'success') {
-        setState(() {
-          isOTPSent = true;
-        });
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("OTP sent to your email")));
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['data'])));
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error sending OTP")));
-    }
-  }
-
-  void verifyOTPAndRegister() async {
-    String otp = otpController.text;
-    String email = emailController.text;
-
-    if (otp.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Enter OTP"),
-        backgroundColor: Colors.red,
-      ));
-      return;
-    }
-
-    setState(() {
-      isLoading = true;
-    });
-
-    try {
-      final response = await http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/otp_verifications.php"),
-        body: {
-          'action': 'verify_otp',
-          'email': email,
-          'otp': otp,
-        },
-      );
-
-      setState(() {
-        isLoading = false;
-      });
-
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'success') {
-        userRegistration();
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['data'])));
-      }
-    } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error verifying OTP")));
-    }
-  }
-
   void userRegistration() async {
     setState(() {
       isLoading = true;
@@ -320,10 +229,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String email = emailController.text;
     String password = passwordController.text;
 
+    // Basic validation before submitting
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) {
+      setState(() {
+        isLoading = false;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Please fill all fields")),
+      );
+      return;
+    }
+
     try {
       final response = await http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/users.php"),
+        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/register_user.php"),
         body: {
+          'action': 'register_user',
           'title': title,
           'first_name': firstName,
           'last_name': lastName,
@@ -334,25 +255,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
       );
 
+      print('Response Status: ${response.statusCode}');
+      print('Response Body: ${response.body}');
+
       setState(() {
         isLoading = false;
       });
 
-      var data = jsonDecode(response.body);
-      if (data['status'] == 'success') {
-        Navigator.pop(context);
+      if (response.statusCode == 200) {
+        var data = jsonDecode(response.body);
+        if (data['status'] == 'success') {
+          Navigator.pop(context);
+        } else {
+          ScaffoldMessenger.of(context)
+              .showSnackBar(SnackBar(content: Text(data['data'])));
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['data'])));
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Server error: ${response.statusCode}")),
+        );
       }
     } catch (e) {
+      print('Error: $e');
       setState(() {
         isLoading = false;
       });
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Error registering user")));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Error registering user")));
     }
-  }
-
-  bool isValidEmail(String email) {
-    return RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$").hasMatch(email);
   }
 }

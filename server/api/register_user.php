@@ -1,40 +1,39 @@
 <?php
 include_once("dbconnect.php");
 
-// Check if required fields are passed in POST request
-if (!isset($_POST['email'], $_POST['password'], $_POST['title'], $_POST['firstName'], $_POST['lastName'], $_POST['phone'], $_POST['address']) || 
-    empty($_POST['email']) || empty($_POST['password']) || empty($_POST['firstName']) || empty($_POST['lastName'])) {
-    $response = array('status' => 'failed', 'data' => 'Missing required fields');
-    sendJsonResponse($response);
-    die();
+if (isset($_POST['action'])) {
+    $action = $_POST['action'];
+    
+    if ($action == 'register_user' && isset($_POST['email']) && isset($_POST['password'])) {
+        registerUser($_POST);
+    } else {
+        sendJsonResponse('error', 'Invalid parameters');
+    }
 }
 
-// Sanitize and validate user inputs
-$title = $conn->real_escape_string($_POST['title']);
-$firstName = $conn->real_escape_string($_POST['firstName']);
-$lastName = $conn->real_escape_string($_POST['lastName']);
-$phone = $conn->real_escape_string($_POST['phone']);
-$address = $conn->real_escape_string($_POST['address']);
-$email = $conn->real_escape_string($_POST['email']);
+function registerUser($data) {
+    global $conn;
 
-// Hash the password
-$password = sha1($_POST['password']); // Consider using `password_hash` in production
-
-// Insert the data into the database
-$sqlinsert = "INSERT INTO `tbl_admins`(`admin_title`,`admin_firstName`,`admin_lastName`,`admin_phone`,`admin_address`,`admin_email`, `admin_pass`) VALUES ('$title','$firstName','$lastName','$phone','$address','$email', '$password')";
-
-// Execute the query and send appropriate response
-if ($conn->query($sqlinsert) === TRUE) {
-    $response = array('status' => 'success', 'data' => null);
-    sendJsonResponse($response);
-} else {
-    $response = array('status' => 'failed', 'data' => 'Database error: ' . $conn->error);
-    sendJsonResponse($response);
+    $title = $data['title'];
+    $firstName = $data['firstName'];
+    $lastName = $data['lastName'];
+    $phone = $data['phone'];
+    $address = $data['address'];
+    $email = $data['email'];
+    $password = md5($data['password']); // hash the password for storage
+    
+    $query = "INSERT INTO tbl_admins (title, firstName, lastName, phone, address, email, password) 
+              VALUES ('$title', '$firstName', '$lastName', '$phone', '$address', '$email', '$password')";
+    
+    if (mysqli_query($conn, $query)) {
+        sendJsonResponse('success', 'User registered successfully');
+    } else {
+        sendJsonResponse('error', 'Failed to register user');
+    }
 }
 
-// Function to send JSON response
-function sendJsonResponse($sentArray) {
-    header('Content-Type: application/json');
-    echo json_encode($sentArray);
+function sendJsonResponse($status, $message) {
+    echo json_encode(['status' => $status, 'data' => $message]);
+    exit;
 }
 ?>

@@ -217,29 +217,39 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
     http.post(
-      Uri.parse("${MyConfig.servername}/my_memberlink_app/api/login_user.php"),
-      body: {"email": email, "password": password},
-    ).then((response) {
-      if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        if (data['status'] == "success") {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Entry Success"),
-            backgroundColor: Colors.green,
-          ));
-          // Navigate to news_screen on successful login
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (content) => const MainScreen()),
-          );
-        } else {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-            content: Text("Entry Failed"),
-            backgroundColor: Colors.red,
-          ));
-        }
+  Uri.parse("${MyConfig.servername}/my_memberlink_app/api/login_user.php"),
+  body: {"email": email, "password": password},
+).then((response) {
+  print("Response Body: ${response.body}"); // Debugging line
+  print("Response Status Code: ${response.statusCode}");
+  if (response.statusCode == 200) {
+    try {
+      var data = jsonDecode(response.body); // Fails if response isn't JSON
+      if (data['status'] == "success") {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Entry Success"),
+          backgroundColor: Colors.green,
+        ));
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (content) => const MainScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+          content: Text("Entry Failed"),
+          backgroundColor: Colors.red,
+        ));
       }
-    });
+    } catch (e) {
+      print("JSON Decode Error: $e"); // Log the exception
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Invalid server response"),
+        backgroundColor: Colors.red,
+      ));
+    }
+  }
+});
+
   }
 
   Future<void> handleRememberMe(bool value) async {
