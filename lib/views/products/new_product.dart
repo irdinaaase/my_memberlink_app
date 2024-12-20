@@ -7,6 +7,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:permission_handler/permission_handler.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:my_memberlink_app/myconfig.dart';
 
 class NewProductScreen extends StatefulWidget {
@@ -21,10 +22,10 @@ class _NewProductScreenState extends State<NewProductScreen> {
   File? _image;
 
   final _formKey = GlobalKey<FormState>();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController descriptionController = TextEditingController();
-  TextEditingController quantityController = TextEditingController();
-  TextEditingController priceController = TextEditingController();
+  final nameController = TextEditingController();
+  final descriptionController = TextEditingController();
+  final quantityController = TextEditingController();
+  final priceController = TextEditingController();
 
   @override
   void initState() {
@@ -51,13 +52,20 @@ class _NewProductScreenState extends State<NewProductScreen> {
         );
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Permission request failed: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showErrorSnackbar("Permission request failed: $e");
     }
+  }
+
+  void showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
+    );
+  }
+
+  void showSuccessSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), backgroundColor: Colors.green),
+    );
   }
 
   @override
@@ -72,9 +80,7 @@ class _NewProductScreenState extends State<NewProductScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.home),
-            onPressed: () {
-              Navigator.pop(context);
-            },
+            onPressed: () => Navigator.pop(context),
           )
         ],
       ),
@@ -87,15 +93,13 @@ class _NewProductScreenState extends State<NewProductScreen> {
               child: Column(
                 children: [
                   GestureDetector(
-                    onTap: () {
-                      showSelectionDialog();
-                    },
+                    onTap: showSelectionDialog,
                     child: Container(
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           fit: BoxFit.contain,
                           image: _image == null
-                              ? const AssetImage("assets/images/camera.png")
+                              ? const AssetImage("assets/images/placeholder.png")
                               : FileImage(_image!) as ImageProvider,
                         ),
                         borderRadius: BorderRadius.circular(10),
@@ -124,6 +128,7 @@ class _NewProductScreenState extends State<NewProductScreen> {
                     "Quantity",
                     "Enter Quantity",
                     keyboardType: TextInputType.number,
+                    numericValidation: true,
                   ),
                   const SizedBox(height: 10),
                   buildTextField(
@@ -131,56 +136,18 @@ class _NewProductScreenState extends State<NewProductScreen> {
                     "Price",
                     "Enter Price",
                     keyboardType: TextInputType.number,
+                    numericValidation: true,
                   ),
                   const SizedBox(height: 10),
                   MaterialButton(
                     elevation: 10,
-                    onPressed: () {
-                      if (!_formKey.currentState!.validate()) {
-                        return;
-                      }
-                      if (_image == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text("Please upload an image"),
-                            backgroundColor: Colors.red,
-                          ),
-                        );
-                        return;
-                      }
-                      compressImage(_image!).then((compressedImage) {
-                        if (compressedImage == null) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text("Image compression failed."),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
-                        double filesize = getFileSize(compressedImage);
-                        if (filesize > 100) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text(
-                                  "Image size too large after compression"),
-                              backgroundColor: Colors.red,
-                            ),
-                          );
-                          return;
-                        }
-                        _image = compressedImage;
-                        insertProductDialog();
-                      });
-                    },
+                    onPressed: handleInsert,
                     minWidth: screenWidth,
                     height: 50,
                     color: Colors.amber,
-                    child: Text(
+                    child: const Text(
                       "Insert",
-                      style: TextStyle(
-                        color: Colors.black,
-                      ),
+                      style: TextStyle(color: Colors.black),
                     ),
                   ),
                 ],
@@ -198,9 +165,18 @@ class _NewProductScreenState extends State<NewProductScreen> {
     String validationText, {
     int maxLines = 1,
     TextInputType keyboardType = TextInputType.text,
+    bool numericValidation = false,
   }) {
     return TextFormField(
-      validator: (value) => value!.isEmpty ? validationText : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return validationText;
+        }
+        if (numericValidation && (double.tryParse(value) == null || double.parse(value) <= 0)) {
+          return "$hintText must be a positive number";
+        }
+        return null;
+      },
       controller: controller,
       maxLines: maxLines,
       keyboardType: keyboardType,
@@ -210,7 +186,6 @@ class _NewProductScreenState extends State<NewProductScreen> {
         ),
         hintText: hintText,
         hintStyle: TextStyle(
-          fontFamily: "MagicSchoolOne",
           fontSize: 16,
           color: Colors.grey.shade700,
         ),
@@ -222,23 +197,17 @@ class _NewProductScreenState extends State<NewProductScreen> {
     try {
       showDialog(
         context: context,
-        builder: (BuildContext context) {
+        builder: (context) {
           return AlertDialog(
             title: const Text("Select from"),
             content: Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(screenWidth / 4, screenHeight / 8),
-                  ),
                   child: const Text('Gallery'),
                   onPressed: () => getImage(ImageSource.gallery),
                 ),
                 ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    fixedSize: Size(screenWidth / 4, screenHeight / 8),
-                  ),
                   child: const Text('Camera'),
                   onPressed: () => getImage(ImageSource.camera),
                 ),
@@ -248,12 +217,7 @@ class _NewProductScreenState extends State<NewProductScreen> {
         },
       );
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to show selection dialog: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showErrorSnackbar("Failed to show selection dialog: $e");
     }
   }
 
@@ -261,17 +225,11 @@ class _NewProductScreenState extends State<NewProductScreen> {
     try {
       final image = await ImagePicker().pickImage(source: source);
       if (image == null) return;
-      final imagePermanent = File(image.path);
       setState(() {
-        _image = imagePermanent;
+        _image = File(image.path);
       });
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to pick image: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+      showErrorSnackbar("Failed to pick image: $e");
     }
   }
 
@@ -289,125 +247,62 @@ class _NewProductScreenState extends State<NewProductScreen> {
         minHeight: 1024,
       );
 
-      if (result == null) {
-        debugPrint("Compression failed: Result is null");
-        return null;
-      }
-
-      debugPrint("Compression successful: ${result.path}");
-      return File(result.path);
+      return result == null ? null : File(result.path);
     } catch (e) {
       debugPrint("Compression exception: $e");
       return null;
     }
   }
 
-  double getFileSize(File file) {
-    try {
-      int sizeInBytes = file.lengthSync();
-      double sizeInKB = sizeInBytes / 1024;
-      debugPrint("File size: $sizeInKB KB");
-      return sizeInKB;
-    } catch (e) {
-      debugPrint("Failed to calculate file size: $e");
-      return 0;
-    }
+  Future<String> encodePlaceholderImage() async {
+    final bytes = await rootBundle.load('assets/images/placeholder.png');
+    return base64Encode(bytes.buffer.asUint8List());
   }
 
-  void insertProductDialog() {
-    try {
-      showDialog(
-        context: context,
-        builder: (BuildContext context) {
-          return AlertDialog(
-            title: const Text("Insert Product"),
-            content: const Text("Are you sure?"),
-            actions: [
-              TextButton(
-                child: const Text("Yes"),
-                onPressed: () {
-                  insertProduct();
-                  Navigator.of(context).pop();
-                },
-              ),
-              TextButton(
-                child: const Text("No"),
-                onPressed: () => Navigator.of(context).pop(),
-              ),
-            ],
-          );
-        },
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Failed to show dialog: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
+  Future<void> handleInsert() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    String imageBase64;
+    if (_image == null) {
+      imageBase64 = await encodePlaceholderImage();
+    } else {
+      final compressedImage = await compressImage(_image!);
+      if (compressedImage == null) {
+        showErrorSnackbar("Image compression failed.");
+        return;
+      }
+      imageBase64 = base64Encode(compressedImage.readAsBytesSync());
     }
+
+    insertProduct(imageBase64);
   }
 
-  void insertProduct() {
-    try {
-      String name = nameController.text;
-      String description = descriptionController.text;
-      String quantity = quantityController.text;
-      String price = priceController.text;
-      String image = base64Encode(_image!.readAsBytesSync());
+  void insertProduct(String imageBase64) {
+    final body = {
+      "product_name": nameController.text,
+      "product_description": descriptionController.text,
+      "product_quantity": quantityController.text,
+      "product_price": priceController.text,
+      "product_filename": imageBase64,
+    };
 
-      http.post(
-        Uri.parse(
-            "${MyConfig.servername}/my_memberlink_app/api/insert_products.php"),
-        body: {
-          "product_name": name,
-          "product_description": description,
-          "product_quantity": quantity,
-          "product_price": price,
-          "product_filename": image,
-        },
-      ).then((response) {
-        if (response.statusCode == 200) {
-          var data = jsonDecode(response.body);
-          if (data['status'] == "success") {
-            Navigator.pop(context);
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Insert Success"),
-                backgroundColor: Colors.green,
-              ),
-            );
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text("Insert Failed"),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
+    http.post(
+      Uri.parse("${MyConfig.servername}/my_memberlink_app/api/insert_products.php"),
+      body: body,
+    ).then((response) {
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        if (data['status'] == "success") {
+          Navigator.pop(context);
+          showSuccessSnackbar("Insert Success");
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text("Server error: ${response.statusCode}"),
-              backgroundColor: Colors.red,
-            ),
-          );
+          showErrorSnackbar("Insert Failed");
         }
-      }).catchError((error) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text("Network Error: $error"),
-            backgroundColor: Colors.red,
-          ),
-        );
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text("Insert Product failed: $e"),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+      } else {
+        showErrorSnackbar("Server error: ${response.statusCode}");
+      }
+    }).catchError((error) {
+      showErrorSnackbar("Network Error: $error");
+    });
   }
 }
