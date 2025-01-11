@@ -1,11 +1,3 @@
-<?php
-$servername = "localhost";
-$username   = "root";
-$password   = "";
-$dbname     = "memberlink_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+class MyConfig{
+    static const String servername = "https://humancc.site";
 }
-?>

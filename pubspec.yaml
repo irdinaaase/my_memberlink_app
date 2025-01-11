@@ -21,21 +21,24 @@ dependencies:
   video_player: ^2.3.0
   permission_handler: ^10.0.0 
   flutter_image_compress: ^2.3.0
+  webview_flutter: ^4.7.0
 
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.9.2
+
 
 flutter:
   uses-material-design: true
-
-  # Asset directories
   assets:
     - assets/images/
     - assets/products/
     - assets/animations/
+    - assets/icons/
+    - assets/home_images/
 
   # Custom fonts
   fonts:
@@ -48,3 +51,8 @@ flutter:
     - family: magic_school
       fonts:
         - asset: assets/fonts/MagicSchoolOne.ttf
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/daily_prophet.png"  #flutter pub run flutter_launcher_icons:main

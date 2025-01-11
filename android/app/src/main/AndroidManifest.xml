@@ -19,7 +19,7 @@
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" tools:targetApi="33" />
 
     <application
-        android:label="my_memberlink_app"
+        android:label="The Daily Prophet"
         android:icon="@mipmap/ic_launcher"
         android:enableOnBackInvokedCallback="true"
         android:requestLegacyExternalStorage="true">

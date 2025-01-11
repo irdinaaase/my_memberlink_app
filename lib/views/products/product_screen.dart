@@ -6,7 +6,7 @@ import 'package:my_memberlink_app/model/myproduct.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/products/edit_product.dart';
 import 'package:my_memberlink_app/views/products/new_product.dart';
-import 'package:my_memberlink_app/views/shared/mydrawer.dart';
+import 'package:my_memberlink_app/views/shares/mydrawer.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key});
@@ -35,16 +35,22 @@ class _ProductScreenState extends State<ProductScreen> {
   Widget build(BuildContext context) {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
-
     return Scaffold(
+
       appBar: AppBar(
-        title: const Text(
-          "Hogwarts Wares",
-          style: TextStyle(
-            fontFamily: "HarryPotter",
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.yellow,
+        toolbarHeight: 70, // Adjust the height as needed
+        centerTitle: true,
+        flexibleSpace: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(
+                top: 20), // Adjust the top padding as needed
+            child: ClipOval(
+              child: Image.asset(
+                'assets/icons/head.png', // Replace with your image path
+                height: 60, // Set the desired height
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
         backgroundColor: Colors.brown[800],
@@ -59,6 +65,7 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
         ],
       ),
+      
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -285,9 +292,8 @@ class _ProductScreenState extends State<ProductScreen> {
                 loadProductsData();
               },
               style: ElevatedButton.styleFrom(
-                backgroundColor: currentPage == pageIndex
-                    ? Colors.amber
-                    : Colors.brown,
+                backgroundColor:
+                    currentPage == pageIndex ? Colors.amber : Colors.brown,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8.0),

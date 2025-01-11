@@ -7,7 +7,7 @@ import 'package:my_memberlink_app/model/myevent.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/events/edit_event.dart';
 import 'package:my_memberlink_app/views/events/new_event.dart';
-import 'package:my_memberlink_app/views/shared/mydrawer.dart';
+import 'package:my_memberlink_app/views/shares/mydrawer.dart';
 import 'package:http/http.dart' as http;
 
 class EventScreen extends StatefulWidget {

@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import 'package:my_memberlink_app/model/news.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/newsletter/edit_news.dart';
-import 'package:my_memberlink_app/views/shared/mydrawer.dart';
+import 'package:my_memberlink_app/views/shares/mydrawer.dart';
 import 'package:my_memberlink_app/views/newsletter/new_news.dart';
 import 'package:http/http.dart' as http;
 
@@ -38,24 +38,34 @@ class _MainScreenState extends State<MainScreen> {
     screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          "The Daily Prophet",
-          style: TextStyle(
-            fontFamily: 'HarryPotter', // Custom Harry Potter font
-            fontSize: 24,
-            color: Colors.yellow,
+        
+        appBar: AppBar(
+        toolbarHeight: 70, 
+        centerTitle: true,
+        flexibleSpace: Center(
+          child: Padding(
+            padding: const EdgeInsets.only(
+                top: 20), 
+            child: ClipOval(
+              child: Image.asset(
+                'assets/icons/head.png', 
+                height: 60, 
+                fit: BoxFit.cover,
+              ),
+            ),
           ),
         ),
-        backgroundColor: Colors.brown[800], // House Gryffindor theme
+        backgroundColor: Colors.brown[800],
         actions: [
           IconButton(
-              onPressed: () {
-                loadNewsData();
-              },
-              icon: const Icon(Icons.refresh, color: Colors.yellow))
+            onPressed: () async {
+              //await loadNewsData();
+            },
+            icon: const Icon(Icons.refresh, color: Colors.amber),
+          ),
         ],
       ),
+      
       body: Stack(
         children: [
           // Background Image
@@ -63,12 +73,11 @@ class _MainScreenState extends State<MainScreen> {
             decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage(
-                    "assets/images/hogwarts_castle.jpg"), // Background image
+                    "assets/images/hogwarts_castle.jpg"), 
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Foreground Content
           newsList.isEmpty
               ? Center(
                   child: Text(

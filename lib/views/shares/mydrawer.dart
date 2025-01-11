@@ -114,7 +114,7 @@ class MyDrawer extends StatelessWidget {
       currentAccountPicture: CircleAvatar(
         backgroundImage: AssetImage(profileImage),
       ),
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: Colors.brown,  // White background for the user details section
         borderRadius: BorderRadius.vertical(top: Radius.circular(0.0)),
       ),
