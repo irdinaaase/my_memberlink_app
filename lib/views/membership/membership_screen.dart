@@ -6,7 +6,7 @@ import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/membership/membership_details.dart';
 import 'package:my_memberlink_app/views/shares/mydrawer.dart';
-
+import 'package:my_memberlink_app/views/membership/membership_history.dart';
 
 class MembershipScreen extends StatefulWidget {
   final User userdata;
@@ -38,6 +38,19 @@ Widget build(BuildContext context) {
     appBar: AppBar(
       title: const Text("Membership Plans"),
       backgroundColor: Colors.brown[800],
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.history),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => MembershipHistoryScreen(userdata: widget.userdata),
+              ),
+            );
+          },
+        ),
+      ],
     ),
     body: membershipList.isEmpty
         ? Center(

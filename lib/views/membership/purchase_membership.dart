@@ -1,17 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:my_memberlink_app/model/membership.dart';
+import 'package:my_memberlink_app/views/newsletter/news_screen.dart';
 import 'package:my_memberlink_app/model/user.dart';
 
 class PurchaseMembershipScreen extends StatefulWidget {
   final Membership membership;
   final User userdata;
 
-  const PurchaseMembershipScreen(
-      {super.key,
-      required this.membership,
-      required this.userdata,
-     });
+  const PurchaseMembershipScreen({
+    super.key,
+    required this.membership,
+    required this.userdata,
+  });
 
   @override
   State<PurchaseMembershipScreen> createState() =>
@@ -31,6 +32,8 @@ class _PurchaseMembershipScreenState extends State<PurchaseMembershipScreen> {
     String name = widget.userdata.lastName ?? '';
     String userid = widget.userdata.id ?? '';
     String amount = widget.membership.membershipsPrice.toString();
+    String type = widget.membership.membershipsName.toString();
+
 
     print("User email: ${widget.userdata.email}");
     print("User phone: ${widget.userdata.phone}");
@@ -56,6 +59,7 @@ class _PurchaseMembershipScreenState extends State<PurchaseMembershipScreen> {
         'users_lastname': name,
         'users_id': userid,
         'payments_amount': amount,
+        'memberships_name': type,
       },
     );
 
@@ -91,11 +95,22 @@ class _PurchaseMembershipScreenState extends State<PurchaseMembershipScreen> {
     final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => MainScreen(userdata: widget.userdata)),
+            );
+          },
+        ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(6.0),
           child: LinearProgressIndicator(
             backgroundColor: theme.colorScheme.onPrimary,
-            valueColor: AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
+            valueColor:
+                AlwaysStoppedAnimation<Color>(theme.colorScheme.primary),
             value: _progress,
           ),
         ),

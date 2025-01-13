@@ -1,3 +1,5 @@
+
+text/x-generic register_user.php ( PHP script, ASCII text, with CRLF line terminators )
 <?php
 ini_set('display_errors', 0); 
 error_reporting(E_ALL);

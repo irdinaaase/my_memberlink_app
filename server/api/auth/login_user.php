@@ -1,3 +1,5 @@
+
+text/x-generic login_user.php ( PHP script, ASCII text, with CRLF line terminators )
 <?php
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $response = array('status' => 'failed', 'data' => 'Invalid request method');
@@ -46,8 +48,17 @@ if ($result->num_rows > 0) {
         'status' => 'success',
         'data' => array(
             'user_id' => $userdata['users_id'],
+            'user_title' => $userdata['users_title'],
+            'user_firstName' => $userdata['users_firstName'],
+            'user_lastName' => $userdata['users_lastName'],
+            'user_phone' => $userdata['users_phone'],
+            'user_address' => $userdata['users_address'],
             'user_email' => $userdata['users_email'],
-            'user_name' => $userdata['users_name']
+            'user_password' => $userdata['users_password'],
+            'user_image' => $userdata['users_image'],
+            'user_datereg' => $userdata['users_datereg'],
+            'membership_id' => $userdata['memberships_id'],
+            'membership_status' => $userdata['memberships_status'],
         )
     ));
 } else {
