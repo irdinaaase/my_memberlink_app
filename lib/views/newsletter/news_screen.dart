@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_memberlink_app/model/news.dart';
+import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/newsletter/edit_news.dart';
 import 'package:my_memberlink_app/views/shares/mydrawer.dart';
@@ -11,7 +12,8 @@ import 'package:my_memberlink_app/views/newsletter/new_news.dart';
 import 'package:http/http.dart' as http;
 
 class MainScreen extends StatefulWidget {
-  const MainScreen({super.key});
+  final User userdata;
+  const MainScreen({super.key, required this.userdata});
 
   @override
   State<MainScreen> createState() => _MainScreenState();
@@ -86,6 +88,19 @@ class _MainScreenState extends State<MainScreen> {
                 )
               : Column(
                   children: [
+                    // Personalized greeting
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                     "Hello, ${widget.userdata.firstName ?? 'User'} ${widget.userdata.lastName ?? ''}",
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    // Display page info
                     Container(
                       alignment: Alignment.center,
                       margin: const EdgeInsets.all(8),
@@ -190,7 +205,9 @@ class _MainScreenState extends State<MainScreen> {
                 ),
         ],
       ),
-      drawer: const MyDrawer(),
+      drawer: MyDrawer(
+        userdata: widget.userdata,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () async {
           await Navigator.push(context,

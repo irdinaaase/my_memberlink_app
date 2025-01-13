@@ -3,13 +3,15 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_memberlink_app/model/product.dart';
+import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/products/edit_product.dart';
 import 'package:my_memberlink_app/views/products/new_product.dart';
 import 'package:my_memberlink_app/views/shares/mydrawer.dart';
 
 class ProductScreen extends StatefulWidget {
-  const ProductScreen({super.key});
+  final User userdata;
+  const ProductScreen({super.key, required this.userdata});
 
   @override
   State<ProductScreen> createState() => _ProductScreenState();
@@ -36,7 +38,6 @@ class _ProductScreenState extends State<ProductScreen> {
     screenHeight = MediaQuery.of(context).size.height;
     screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
-
       appBar: AppBar(
         toolbarHeight: 70, // Adjust the height as needed
         centerTitle: true,
@@ -65,7 +66,6 @@ class _ProductScreenState extends State<ProductScreen> {
           ),
         ],
       ),
-      
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
@@ -110,7 +110,9 @@ class _ProductScreenState extends State<ProductScreen> {
           ],
         ),
       ),
-      drawer: const MyDrawer(),
+      drawer: MyDrawer(
+        userdata: widget.userdata,
+      ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: Colors.amber,
         onPressed: () {

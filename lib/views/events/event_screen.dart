@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:my_memberlink_app/model/event.dart';
+import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/events/edit_event.dart';
 import 'package:my_memberlink_app/views/events/new_event.dart';
@@ -11,7 +12,9 @@ import 'package:my_memberlink_app/views/shares/mydrawer.dart';
 import 'package:http/http.dart' as http;
 
 class EventScreen extends StatefulWidget {
-  const EventScreen({super.key});
+  final User userdata;
+
+  const EventScreen({super.key, required this.userdata});
 
   @override
   State<EventScreen> createState() => _EventScreenState();
@@ -78,7 +81,7 @@ class _EventScreenState extends State<EventScreen> {
                           child: Image.network(
                               errorBuilder: (context, error, stackTrace) =>
                                   SizedBox(
-                                    height: screenHeight/6,
+                                    height: screenHeight / 6,
                                     child: Image.asset(
                                       "assets/images/na.png",
                                     ),
@@ -106,7 +109,9 @@ class _EventScreenState extends State<EventScreen> {
                   ),
                 );
               })),
-      drawer: const MyDrawer(),
+      drawer: MyDrawer(
+        userdata: widget.userdata,
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           Navigator.push(context,
@@ -128,7 +133,8 @@ class _EventScreenState extends State<EventScreen> {
 
   void loadEventsData() {
     http
-        .get(Uri.parse("${MyConfig.servername}/my_memberlink_app/api/load_events.php"))
+        .get(Uri.parse(
+            "${MyConfig.servername}/my_memberlink_app/api/load_events.php"))
         .then((response) {
       log(response.body.toString());
       if (response.statusCode == 200) {

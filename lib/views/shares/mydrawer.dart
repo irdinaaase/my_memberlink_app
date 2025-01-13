@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/views/products/product_screen.dart';
 import 'package:my_memberlink_app/views/events/event_screen.dart';
 import 'package:my_memberlink_app/views/newsletter/news_screen.dart';
+import 'package:my_memberlink_app/views/auth/logout_screen.dart';
 
 class MyDrawer extends StatelessWidget {
-  final String userName = "Irdina Balqis"; 
-  final String userEmail = "irdinaabalqiss@gmail.com";  
-  final String profileImage = "assets/images/avatar.png"; 
+  final User userdata; // Accept userdata as a parameter
 
-  const MyDrawer({super.key});
+  // Constructor to accept userdata
+  const MyDrawer({super.key, required this.userdata});
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +31,7 @@ class MyDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  _customPageRoute(const MainScreen()),
+                  _customPageRoute(MainScreen(userdata: userdata)),
                 );
               },
             ),
@@ -41,21 +42,19 @@ class MyDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  _customPageRoute(const EventScreen()),
+                  _customPageRoute(EventScreen(userdata: userdata)),
                 );
               },
             ),
             _createDrawerItem(
               context: context,
               text: "Members",
-              onTap: () {
-              },
+              onTap: () {},
             ),
             _createDrawerItem(
               context: context,
               text: "Payments",
-              onTap: () {
-              },
+              onTap: () {},
             ),
             _createDrawerItem(
               context: context,
@@ -64,26 +63,29 @@ class MyDrawer extends StatelessWidget {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  _customPageRoute(const ProductScreen()),
+                  _customPageRoute(ProductScreen(userdata: userdata)),
                 );
               },
             ),
             _createDrawerItem(
               context: context,
               text: "Vetting",
-              onTap: () {
-              },
+              onTap: () {},
             ),
             _createDrawerItem(
               context: context,
               text: "Settings",
-              onTap: () {
-              },
+              onTap: () {},
             ),
             _createDrawerItem(
               context: context,
               text: "Logout",
               onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  _customPageRoute(LogoutScreen(userdata: userdata)),
+                );
               },
             ),
           ],
@@ -95,27 +97,29 @@ class MyDrawer extends StatelessWidget {
   Widget _buildUserHeader() {
     return UserAccountsDrawerHeader(
       accountName: Text(
-        userName,
+        "${userdata.title} ${userdata.lastName}", // Use userdata values
         style: const TextStyle(
           fontFamily: "MagicSchoolOne",
           fontSize: 20,
           fontWeight: FontWeight.bold,
-          color: Colors.white,  // Text color changed to black for visibility on white background
+          color: Colors.white,
         ),
       ),
       accountEmail: Text(
-        userEmail,
+        userdata.email ??
+            "", // Use userdata.email, with a fallback if it's null
         style: const TextStyle(
           fontFamily: "MagicSchoolOne",
           fontSize: 16,
-          color: Colors.white,  // Text color changed to black for visibility
+          color: Colors.white,
         ),
       ),
       currentAccountPicture: CircleAvatar(
-        backgroundImage: AssetImage(profileImage),
+        backgroundImage: AssetImage(userdata.profileImage ??
+            "assets/images/avatar.png"), // Fallback image if not set
       ),
       decoration: const BoxDecoration(
-        color: Colors.brown,  // White background for the user details section
+        color: Colors.brown,
         borderRadius: BorderRadius.vertical(top: Radius.circular(0.0)),
       ),
     );
@@ -125,11 +129,12 @@ class MyDrawer extends StatelessWidget {
     return PageRouteBuilder(
       pageBuilder: (context, animation, secondaryAnimation) => page,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        const begin = Offset(1.0, 0.0); // Slide in from the right
+        const begin = Offset(1.0, 0.0);
         const end = Offset.zero;
         const curve = Curves.easeInOut;
 
-        var tween = Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
+        var tween =
+            Tween(begin: begin, end: end).chain(CurveTween(curve: curve));
         var offsetAnimation = animation.drive(tween);
 
         return SlideTransition(position: offsetAnimation, child: child);
@@ -137,7 +142,10 @@ class MyDrawer extends StatelessWidget {
     );
   }
 
-  Widget _createDrawerItem({required BuildContext context, required String text, required GestureTapCallback onTap}) {
+  Widget _createDrawerItem(
+      {required BuildContext context,
+      required String text,
+      required GestureTapCallback onTap}) {
     return ListTile(
       title: Text(
         text,
