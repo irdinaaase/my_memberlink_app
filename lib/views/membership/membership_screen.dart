@@ -2,11 +2,16 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:my_memberlink_app/model/membership.dart';
+import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/membership/membership_details.dart';
+import 'package:my_memberlink_app/views/shares/mydrawer.dart';
+
 
 class MembershipScreen extends StatefulWidget {
-  const MembershipScreen({super.key});
+  final User userdata;
+
+  const MembershipScreen({super.key, required this.userdata});
 
   @override
   State<MembershipScreen> createState() => _MembershipScreenState();
@@ -24,34 +29,40 @@ class _MembershipScreenState extends State<MembershipScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    screenHeight = MediaQuery.of(context).size.height;
-    screenWidth = MediaQuery.of(context).size.width;
+  @override
+Widget build(BuildContext context) {
+  screenHeight = MediaQuery.of(context).size.height;
+  screenWidth = MediaQuery.of(context).size.width;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Membership Plans"),
-        backgroundColor: Colors.brown[800],
-      ),
-      body: membershipList.isEmpty
-          ? Center(
-              child: Text(
-                status,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                ),
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text("Membership Plans"),
+      backgroundColor: Colors.brown[800],
+    ),
+    body: membershipList.isEmpty
+        ? Center(
+            child: Text(
+              status,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
               ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(8),
-              itemCount: membershipList.length,
-              itemBuilder: (context, index) {
-                return buildMembershipCard(membershipList[index]);
-              },
             ),
-    );
-  }
+          )
+        : ListView.builder(
+            padding: const EdgeInsets.all(8),
+            itemCount: membershipList.length,
+            itemBuilder: (context, index) {
+              return buildMembershipCard(membershipList[index]);
+            },
+          ),
+    // Correct placement of the drawer
+    drawer: MyDrawer(
+      userdata: widget.userdata,
+    ),
+  );
+}
+
 
   Widget buildMembershipCard(Membership membership) {
     return Card(
@@ -115,7 +126,7 @@ class _MembershipScreenState extends State<MembershipScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => MembershipDetailsScreen(membership: membership),
+        builder: (context) => MembershipDetailsScreen(membership: membership, userdata: widget.userdata),
       ),
     );
   }

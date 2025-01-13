@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:my_memberlink_app/model/membership.dart';
+import 'package:my_memberlink_app/model/user.dart';
 import 'package:my_memberlink_app/views/membership/purchase_membership.dart';
-// import 'package:my_memberlink_app/myconfig.dart';
 
 class MembershipDetailsScreen extends StatelessWidget {
   final Membership membership;
+  final User userdata;
 
-  const MembershipDetailsScreen({super.key, required this.membership});
+  const MembershipDetailsScreen({super.key, required this.membership, required this.userdata});
 
   @override
   Widget build(BuildContext context) {
@@ -34,7 +35,7 @@ class MembershipDetailsScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      membership.membershipsName ?? "",
+                      membership.membershipsName ?? "No Name Available",
                       style: const TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
@@ -49,7 +50,9 @@ class MembershipDetailsScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     Center(
                       child: Text(
-                        "RM ${membership.membershipsPrice?.toStringAsFixed(2)}",
+                        membership.membershipsPrice != null
+                            ? "RM ${membership.membershipsPrice!.toStringAsFixed(2)}"
+                            : "Price not available",
                         style: const TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
@@ -96,7 +99,7 @@ class MembershipDetailsScreen extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          content ?? "Not available",
+          content ?? "Information not available",
           style: const TextStyle(fontSize: 16),
         ),
         const SizedBox(height: 16),
@@ -105,11 +108,17 @@ class MembershipDetailsScreen extends StatelessWidget {
   }
 
   void navigateToPurchase(BuildContext context) {
+    print("Navigating to Purchase Screen");
+    print("Membership: ${membership.membershipsName}, Price: ${membership.membershipsPrice}");
+    print("User: ${userdata.email}, ID: ${userdata.id}");
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => PurchaseMembershipScreen(membership: membership),
+        builder: (context) => PurchaseMembershipScreen(
+          membership: membership,
+          userdata: userdata
+        ),
       ),
     );
   }
-} 
+}

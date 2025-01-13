@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:my_memberlink_app/model/user.dart';
+import 'package:my_memberlink_app/model/membership.dart';
 import 'package:my_memberlink_app/views/products/product_screen.dart';
 import 'package:my_memberlink_app/views/events/event_screen.dart';
 import 'package:my_memberlink_app/views/newsletter/news_screen.dart';
 import 'package:my_memberlink_app/views/auth/logout_screen.dart';
+import 'package:my_memberlink_app/views/membership/membership_screen.dart';
+
 
 class MyDrawer extends StatelessWidget {
-  final User userdata; // Accept userdata as a parameter
+  final User userdata; 
 
   // Constructor to accept userdata
   const MyDrawer({super.key, required this.userdata});
@@ -49,7 +52,11 @@ class MyDrawer extends StatelessWidget {
             _createDrawerItem(
               context: context,
               text: "Members",
-              onTap: () {},
+              onTap: () {Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  _customPageRoute(MembershipScreen(userdata: userdata)),
+                );},
             ),
             _createDrawerItem(
               context: context,
