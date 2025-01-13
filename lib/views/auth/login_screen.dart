@@ -1,12 +1,9 @@
-// ignore_for_file: use_build_context_synchronously, prefer_const_constructors
-
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/auth/register_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:my_memberlink_app/views/newsletter/news_screen.dart';
-
 import 'package:http/http.dart' as http;
 
 class LoginScreen extends StatefulWidget {
@@ -86,7 +83,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                         ),
                         const SizedBox(height: 20),
-                        // Email input field
+                        // Email input field with auto-suggestions
                         TextField(
                           controller: emailcontroller,
                           keyboardType: TextInputType.emailAddress,
@@ -102,6 +99,41 @@ class _LoginScreenState extends State<LoginScreen> {
                             hintStyle: TextStyle(color: Colors.grey[400]),
                             prefixIcon:
                                 Icon(Icons.email, color: Colors.amber[200]),
+                            suffixIcon: PopupMenuButton<String>(
+                              icon: const Icon(Icons.arrow_drop_down,
+                                  color: Colors.amber),
+                              onSelected: (value) {
+                                String currentText = emailcontroller.text;
+
+                                // Check if the current email has '@' symbol
+                                int atIndex = currentText.indexOf('@');
+
+                                if (atIndex == -1) {
+                                  // No '@' in the email, so append the selected domain
+                                  emailcontroller.text = currentText + value;
+                                } else {
+                                  // '@' exists, replace the domain part
+                                  emailcontroller.text =
+                                      currentText.substring(0, atIndex + 0) +
+                                          value;
+                                }
+                                setState(() {});
+                              },
+                              itemBuilder: (context) => [
+                                const PopupMenuItem(
+                                  value: "@gmail.com",
+                                  child: Text("@gmail.com"),
+                                ),
+                                const PopupMenuItem(
+                                  value: "@yahoo.com",
+                                  child: Text("@yahoo.com"),
+                                ),
+                                const PopupMenuItem(
+                                  value: "@hotmail.com",
+                                  child: Text("@hotmail.com"),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                         const SizedBox(height: 15),
@@ -210,46 +242,70 @@ class _LoginScreenState extends State<LoginScreen> {
   void onLogin() {
     String email = emailcontroller.text;
     String password = passwordcontroller.text;
+
     if (email.isEmpty || password.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
         content: Text("Please enter email and password"),
+        backgroundColor: Colors.red,
       ));
       return;
     }
+
     http.post(
-  Uri.parse("${MyConfig.servername}/my_memberlink_app/api/login_user.php"),
-  body: {"email": email, "password": password},
-).then((response) {
-  print("Response Body: ${response.body}"); // Debugging line
-  print("Response Status Code: ${response.statusCode}");
-  if (response.statusCode == 200) {
-    try {
-      var data = jsonDecode(response.body); // Fails if response isn't JSON
-      if (data['status'] == "success") {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Entry Success"),
-          backgroundColor: Colors.green,
-        ));
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (content) => const MainScreen()),
-        );
+      Uri.parse("${MyConfig.servername}/memberlink/api/login_user.php"),
+      body: {
+        "email": email,
+        "password": password,
+      },
+    ).then((response) {
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response: ${response.body}");
+
+      if (response.statusCode == 200) {
+        try {
+          final jsonResponse = jsonDecode(response.body);
+          if (jsonResponse['status'] == 'success') {
+            // Save user data
+            SharedPreferences.getInstance().then((prefs) {
+              prefs.setString('user_id', jsonResponse['data']['user_id']);
+              prefs.setString('user_email', jsonResponse['data']['user_email']);
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+              content: Text("Login Successful"),
+              backgroundColor: Colors.green,
+            ));
+
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (content) => const MainScreen()),
+            );
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+              content: Text(jsonResponse['message'] ?? "Login Failed"),
+              backgroundColor: Colors.red,
+            ));
+          }
+        } catch (e) {
+          debugPrint("JSON Error: $e");
+          ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+            content: Text("Error processing response: $e"),
+            backgroundColor: Colors.red,
+          ));
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-          content: Text("Entry Failed"),
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+          content: Text("Server Error: ${response.statusCode}"),
           backgroundColor: Colors.red,
         ));
       }
-    } catch (e) {
-      print("JSON Decode Error: $e"); // Log the exception
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-        content: Text("Invalid server response"),
+    }).catchError((error) {
+      debugPrint("Network Error: $error");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text("Network Error: $error"),
         backgroundColor: Colors.red,
       ));
-    }
-  }
-});
-
+    });
   }
 
   Future<void> handleRememberMe(bool value) async {

@@ -2,38 +2,57 @@
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     $response = array('status' => 'failed', 'data' => 'Invalid request method');
     sendJsonResponse($response);
-    die;
+    die();
 }
 
 include_once("dbconnect.php");
 
+if (!$conn) {
+    $response = array('status' => 'failed', 'message' => 'Database connection failed');
+    sendJsonResponse($response);
+    die();
+}
+
+function sendJsonResponse($sentArray) {
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    echo json_encode($sentArray);
+    exit();
+}
+
+if (!isset($_POST['email']) || !isset($_POST['password'])) {
+    sendJsonResponse(array('status' => 'failed', 'message' => 'Missing credentials'));
+}
+
 $email = mysqli_real_escape_string($conn, $_POST['email']);
-$password = md5($_POST['password']); // Ensure your database uses sha1 hashed passwords
+$password = md5($_POST['password']);
 
 // Query to check login credentials
-$sqllogin = "SELECT `admin_email` FROM `tbl_admins` WHERE `admin_email` = '$email' AND `admin_password` = '$password'";
-$result = $conn->query($sqllogin);
+$sqllogin = "SELECT * FROM `tbl_users` WHERE `users_email` = ? AND `users_password` = ?";
+$stmt = $conn->prepare($sqllogin);
+$stmt->bind_param("ss", $email, $password);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if (!$result) {
-    // SQL error handling
-    $response = array('status' => 'failed', 'data' => mysqli_error($conn));
-    sendJsonResponse($response);
-    die;
+    sendJsonResponse(array('status' => 'failed', 'message' => mysqli_error($conn)));
 }
 
 if ($result->num_rows > 0) {
-    // Login success
-    $response = array('status' => 'success', 'data' => null);
-    sendJsonResponse($response);
+    $userdata = $result->fetch_assoc();
+    sendJsonResponse(array(
+        'status' => 'success',
+        'data' => array(
+            'user_id' => $userdata['users_id'],
+            'user_email' => $userdata['users_email'],
+            'user_name' => $userdata['users_name']
+        )
+    ));
 } else {
-    // Login failed
-    $response = array('status' => 'failed', 'data' => 'Invalid email or password');
-    sendJsonResponse($response);
+    sendJsonResponse(array('status' => 'failed', 'message' => 'Invalid credentials'));
 }
 
-function sendJsonResponse($sentArray)
-{
-    header('Content-Type: application/json');
-    echo json_encode($sentArray);
-}
+$conn->close();
 ?>

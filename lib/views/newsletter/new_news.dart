@@ -177,7 +177,9 @@ class _NewNewsScreenState extends State<NewNewsScreen> {
     String details = detailsController.text;
     http.post(
       Uri.parse("${MyConfig.servername}/my_memberlink_app/api/insert_news.php"),
-      body: {"title": title, "details": details},
+      body: {
+        "title": title, 
+        "details": details},
     ).then((response) {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

@@ -1,8 +1,11 @@
 import 'dart:async'; // Import Timer
 import 'package:flutter/material.dart';
+import 'package:my_memberlink_app/model/user.dart';
+
 
 class HomeScreen extends StatefulWidget {
-  const HomeScreen({super.key});
+  final User userdata;
+  const HomeScreen({super.key, required this.userdata});
 
   @override
   State<HomeScreen> createState() => _HomeScreenState();

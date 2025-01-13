@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:my_memberlink_app/model/myevent.dart';
+import 'package:my_memberlink_app/model/event.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 
 class EditEventScreen extends StatefulWidget {
-  final MyEvent myevent;
+  final Event myevent;
 
   const EditEventScreen({super.key, required this.myevent});
 

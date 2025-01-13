@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:my_memberlink_app/model/myproduct.dart';
+import 'package:my_memberlink_app/model/product.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/products/edit_product.dart';
 import 'package:my_memberlink_app/views/products/new_product.dart';

@@ -38,18 +38,16 @@ class _MainScreenState extends State<MainScreen> {
     screenWidth = MediaQuery.of(context).size.width;
 
     return Scaffold(
-        
-        appBar: AppBar(
-        toolbarHeight: 70, 
+      appBar: AppBar(
+        toolbarHeight: 70,
         centerTitle: true,
         flexibleSpace: Center(
           child: Padding(
-            padding: const EdgeInsets.only(
-                top: 20), 
+            padding: const EdgeInsets.only(top: 20),
             child: ClipOval(
               child: Image.asset(
-                'assets/icons/head.png', 
-                height: 60, 
+                'assets/icons/head.png',
+                height: 60,
                 fit: BoxFit.cover,
               ),
             ),
@@ -59,21 +57,18 @@ class _MainScreenState extends State<MainScreen> {
         actions: [
           IconButton(
             onPressed: () async {
-              //await loadNewsData();
+              loadNewsData();
             },
             icon: const Icon(Icons.refresh, color: Colors.amber),
           ),
         ],
       ),
-      
       body: Stack(
         children: [
-          // Background Image
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage(
-                    "assets/images/hogwarts_castle.jpg"), 
+                image: AssetImage("assets/images/hogwarts_castle.jpg"),
                 fit: BoxFit.cover,
               ),
             ),
@@ -162,7 +157,6 @@ class _MainScreenState extends State<MainScreen> {
                         },
                       ),
                     ),
-                    // Pagination Buttons
                     SizedBox(
                       height: screenHeight * 0.05,
                       child: ListView.builder(
@@ -218,28 +212,39 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  void loadNewsData() {
-    http
-        .get(Uri.parse(
-            "${MyConfig.servername}/my_memberlink_app/api/load_news.php?pageno=$curpage"))
-        .then((response) {
+  Future<void> loadNewsData() async {
+    try {
+      var url = Uri.parse("${MyConfig.servername}/memberlink/api/load_news.php");
+      var response = await http.get(url, headers: {
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      });
+
+      debugPrint("Response status: ${response.statusCode}");
+      debugPrint("Response body: ${response.body}");
+
       if (response.statusCode == 200) {
-        var data = jsonDecode(response.body);
-        if (data['status'] == "success") {
-          var result = data['data']['news'];
-          newsList.clear();
-          for (var item in result) {
-            News news = News.fromJson(item);
-            newsList.add(news);
-          }
-          numofpage = int.parse(data['numofpage'].toString());
-          numofresult = int.parse(data['numberofresult'].toString());
-          setState(() {});
+        var jsonData = jsonDecode(response.body);
+
+        if (jsonData['status'] == 'success' && jsonData['data'] != null) {
+          var newsData = jsonData['data'] as List;
+          setState(() {
+            newsList = newsData.map((item) => News.fromJson(item)).toList();
+            numofpage = int.parse(jsonData['numofpage'].toString());
+            numofresult = int.parse(jsonData['numberofresult'].toString());
+          });
+        } else {
+          throw Exception("Invalid JSON structure or missing fields");
         }
       } else {
-        print("Error - The magic failed to load.");
+        throw Exception("HTTP Error: ${response.statusCode}");
       }
-    });
+    } catch (e) {
+      debugPrint("Error loading news: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Error: $e")),
+      );
+    }
   }
 
   void showNewsDetailsDialog(int index) {
@@ -299,8 +304,8 @@ class _MainScreenState extends State<MainScreen> {
               onPressed: () {
                 Navigator.pop(context);
               },
-              child: const Text("No (Protego)"),
-            )
+              child: const Text("No (Finite Incantatem)"),
+            ),
           ],
         );
       },
@@ -310,7 +315,7 @@ class _MainScreenState extends State<MainScreen> {
   void deleteNews(int index) {
     http.post(
         Uri.parse(
-            "${MyConfig.servername}/my_memberlink_app/api/delete_news.php"),
+            "${MyConfig.servername}/memberlink/api/delete_news.php"),
         body: {"newsid": newsList[index].newsId.toString()}).then((response) {
       if (response.statusCode == 200) {
         var data = jsonDecode(response.body);

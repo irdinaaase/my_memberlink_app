@@ -1,19 +1,26 @@
 <?php
-// Disable error display in production
-ini_set('display_errors', 0);
+ini_set('display_errors', 0); 
 error_reporting(E_ALL);
 
 include_once("dbconnect.php");
 
-if (isset($_POST['action'])) {
-    $action = $_POST['action'];
-    
-    // Check if it's the correct action
-    if ($action == 'register_user' && isset($_POST['email']) && isset($_POST['password'])) {
-        registerUser($_POST);
-    } else {
-        sendJsonResponse('error', 'Invalid parameters or missing data');
-    }
+if (!$conn) {
+    sendJsonResponse('error', 'Database connection failed');
+}
+
+function sendJsonResponse($status, $message) {
+    header('Content-Type: application/json');
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization');
+    echo json_encode(['status' => $status, 'message' => $message]);
+    exit;
+}
+
+if (isset($_POST['action']) && $_POST['action'] === 'register_user') {
+    registerUser($_POST);
+} else {
+    sendJsonResponse('error', 'Invalid action or missing parameters');
 }
 
 function registerUser($data) {
@@ -26,24 +33,24 @@ function registerUser($data) {
     $phone = mysqli_real_escape_string($conn, $data['phone']);
     $address = mysqli_real_escape_string($conn, $data['address']);
     $email = mysqli_real_escape_string($conn, $data['email']);
-    $password = md5($data['password']); // hash the password for storage
+    $password = md5($data['password']);
 
     // Validate required fields
     if (empty($title) || empty($firstName) || empty($lastName) || empty($phone) || empty($address) || empty($email) || empty($password)) {
         sendJsonResponse('error', 'All fields are required');
     }
 
-    // Check if the email already exists (Use 'admin_email' instead of 'email')
-    $checkEmailQuery = "SELECT * FROM tbl_admins WHERE admin_email = '$email'";  // Update 'email' to 'admin_email'
+    // Check if the email already exists
+    $checkEmailQuery = "SELECT * FROM tbl_users WHERE users_email = '$email'";
     $result = mysqli_query($conn, $checkEmailQuery);
     if (mysqli_num_rows($result) > 0) {
         sendJsonResponse('error', 'Email already exists');
     }
 
-    // Insert user into the database (Use 'admin_email' for the email column)
-    $query = "INSERT INTO tbl_admins (admin_title, admin_firstName, admin_lastName, admin_phone, admin_address, admin_email, admin_password) 
+    // Insert user into the database
+    $query = "INSERT INTO tbl_users (users_title, users_firstName, users_lastName, users_phone, users_address, users_email, users_password) 
               VALUES ('$title', '$firstName', '$lastName', '$phone', '$address', '$email', '$password')";
-    
+
     if (mysqli_query($conn, $query)) {
         sendJsonResponse('success', 'User registered successfully');
     } else {
@@ -51,11 +58,6 @@ function registerUser($data) {
     }
 }
 
-// Function to send JSON response
-function sendJsonResponse($status, $message) {
-    // Make sure the header is set to JSON
-    header('Content-Type: application/json');
-    echo json_encode(['status' => $status, 'data' => $message]);
-    exit;
-}
+sendJsonResponse('error', 'Unknown error occurred');
+$conn->close();
 ?>

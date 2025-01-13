@@ -11,6 +11,7 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   TextEditingController firstnameController = TextEditingController();
@@ -27,7 +28,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // Background image with a gradient overlay
+          // Background image with gradient overlay
           Container(
             decoration: const BoxDecoration(
               image: DecorationImage(
@@ -60,49 +61,55 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                   child: Padding(
                     padding: const EdgeInsets.all(20.0),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Create New Account',
-                          style: TextStyle(
-                            fontSize: 36,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.amber[200],
-                            fontFamily: 'Cinzel',
-                            shadows: [
-                              Shadow(
-                                offset: const Offset(3, 3),
-                                blurRadius: 8,
-                                color: Colors.black.withOpacity(0.7),
-                              ),
-                            ],
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            'Create New Account',
+                            style: TextStyle(
+                              fontSize: 36,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.amber[200],
+                              fontFamily: 'Cinzel',
+                              shadows: [
+                                Shadow(
+                                  offset: const Offset(3, 3),
+                                  blurRadius: 8,
+                                  color: Colors.black.withOpacity(0.7),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 20),
-                        _buildDropdownField(),
-                        const SizedBox(height: 10),
-                        _buildTextField(firstnameController, "First Name"),
-                        const SizedBox(height: 10),
-                        _buildTextField(lastnameController, "Last Name"),
-                        const SizedBox(height: 10),
-                        _buildTextField(phoneController, "Phone Number",
-                            keyboardType: TextInputType.phone),
-                        const SizedBox(height: 10),
-                        _buildTextField(addressController, "Address",
-                            keyboardType: TextInputType.streetAddress),
-                        const SizedBox(height: 10),
-                        _buildTextField(emailController, "Your Email",
-                            keyboardType: TextInputType.emailAddress),
-                        const SizedBox(height: 10),
-                        _buildPasswordField(),
-                        const SizedBox(height: 20),
-                        isLoading
-                            ? const CircularProgressIndicator()
-                            : _buildActionButton(),
-                        const SizedBox(height: 20),
-                        _buildLoginRedirectText(),
-                      ],
+                          const SizedBox(height: 20),
+                          _buildDropdownField(),
+                          const SizedBox(height: 10),
+                          _buildTextField(
+                              firstnameController, "First Name", false),
+                          const SizedBox(height: 10),
+                          _buildTextField(
+                              lastnameController, "Last Name", false),
+                          const SizedBox(height: 10),
+                          _buildTextField(
+                              phoneController, "Phone Number", false,
+                              keyboardType: TextInputType.phone),
+                          const SizedBox(height: 10),
+                          _buildTextField(addressController, "Address", false,
+                              keyboardType: TextInputType.streetAddress),
+                          const SizedBox(height: 10),
+                          _buildTextField(emailController, "Your Email", true,
+                              keyboardType: TextInputType.emailAddress),
+                          const SizedBox(height: 10),
+                          _buildPasswordField(),
+                          const SizedBox(height: 20),
+                          isLoading
+                              ? const CircularProgressIndicator()
+                              : _buildActionButton(),
+                          const SizedBox(height: 20),
+                          _buildLoginRedirectText(),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -138,12 +145,25 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
   }
 
-  Widget _buildTextField(TextEditingController controller, String hintText,
+  Widget _buildTextField(
+      TextEditingController controller, String hintText, bool isEmail,
       {TextInputType keyboardType = TextInputType.text}) {
-    return TextField(
+    return TextFormField(
       controller: controller,
       keyboardType: keyboardType,
       style: const TextStyle(color: Colors.white),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "$hintText is required";
+        }
+        if (isEmail) {
+          const emailRegex = r'^[^@\s]+@[^@\s]+\.[^@\s]+$';
+          if (!RegExp(emailRegex).hasMatch(value)) {
+            return 'Enter a valid email address';
+          }
+        }
+        return null;
+      },
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.black.withOpacity(0.5),
@@ -152,16 +172,28 @@ class _RegisterScreenState extends State<RegisterScreen> {
         border: const OutlineInputBorder(
           borderRadius: BorderRadius.all(Radius.circular(15)),
         ),
-        prefixIcon: Icon(Icons.text_fields, color: Colors.amber[200]),
+        prefixIcon: Icon(
+          isEmail ? Icons.email : Icons.text_fields,
+          color: Colors.amber[200],
+        ),
       ),
     );
   }
 
   Widget _buildPasswordField() {
-    return TextField(
+    return TextFormField(
       obscureText: passwordVisible,
       controller: passwordController,
       style: const TextStyle(color: Colors.white),
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return "Password is required";
+        }
+        if (value.length < 6) {
+          return "Password must be at least 6 characters long";
+        }
+        return null;
+      },
       decoration: InputDecoration(
         filled: true,
         fillColor: Colors.black.withOpacity(0.5),
@@ -217,6 +249,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   void userRegistration() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
     setState(() {
       isLoading = true;
     });
@@ -229,20 +265,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
     String email = emailController.text;
     String password = passwordController.text;
 
-    // Basic validation before submitting
-    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || password.isEmpty) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill all fields")),
-      );
-      return;
-    }
-
     try {
       final response = await http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/register_user.php"),
+        Uri.parse("${MyConfig.servername}/memberlink/api/register_user.php"),
         body: {
           'action': 'register_user',
           'title': title,
@@ -255,9 +280,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         },
       );
 
-      print('Response Status: ${response.statusCode}');
-      print('Response Body: ${response.body}');
-
       setState(() {
         isLoading = false;
       });
@@ -268,7 +290,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Navigator.pop(context);
         } else {
           ScaffoldMessenger.of(context)
-              .showSnackBar(SnackBar(content: Text(data['data'])));
+              .showSnackBar(SnackBar(content: Text(data['message'])));
         }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -276,7 +298,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
       }
     } catch (e) {
-      print('Error: $e');
       setState(() {
         isLoading = false;
       });

@@ -1,4 +1,4 @@
-class MyEvent {
+class Event {
   String? eventId;
   String? eventTitle;
   String? eventDescription;
@@ -9,7 +9,7 @@ class MyEvent {
   String? eventFilename;
   String? eventDate;
 
-  MyEvent(
+  Event(
       {this.eventId,
       this.eventTitle,
       this.eventDescription,
@@ -20,7 +20,7 @@ class MyEvent {
       this.eventFilename,
       this.eventDate});
 
-  MyEvent.fromJson(Map<String, dynamic> json) {
+  Event.fromJson(Map<String, dynamic> json) {
     eventId = json['event_id'];
     eventTitle = json['event_title'];
     eventDescription = json['event_description'];

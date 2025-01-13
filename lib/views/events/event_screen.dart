@@ -3,7 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:my_memberlink_app/model/myevent.dart';
+import 'package:my_memberlink_app/model/event.dart';
 import 'package:my_memberlink_app/myconfig.dart';
 import 'package:my_memberlink_app/views/events/edit_event.dart';
 import 'package:my_memberlink_app/views/events/new_event.dart';
@@ -18,7 +18,7 @@ class EventScreen extends StatefulWidget {
 }
 
 class _EventScreenState extends State<EventScreen> {
-  List<MyEvent> eventsList = [];
+  List<Event> eventsList = [];
   late double screenWidth, screenHeight;
   final df = DateFormat('dd/MM/yyyy hh:mm a');
   String status = "Loading...";
@@ -137,7 +137,7 @@ class _EventScreenState extends State<EventScreen> {
           var result = data['data']['events'];
           eventsList.clear();
           for (var item in result) {
-            MyEvent myevent = MyEvent.fromJson(item);
+            Event myevent = Event.fromJson(item);
             eventsList.add(myevent);
           }
           setState(() {});
@@ -168,7 +168,7 @@ class _EventScreenState extends State<EventScreen> {
                     height: screenHeight / 4,
                     fit: BoxFit.cover,
                     scale: 4,
-                    "${MyConfig.servername}/my_memberlink_app/assets/events/${eventsList[index].eventFilename}"),
+                    "${MyConfig.servername}/memberlink/assets/events/${eventsList[index].eventFilename}"),
                 Text(eventsList[index].eventType.toString()),
                 Text(df.format(
                     DateTime.parse(eventsList[index].eventDate.toString()))),
@@ -184,7 +184,7 @@ class _EventScreenState extends State<EventScreen> {
               TextButton(
                 onPressed: () async {
                   Navigator.pop(context);
-                  MyEvent myevent = eventsList[index];
+                  Event myevent = eventsList[index];
                   await Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -237,7 +237,7 @@ class _EventScreenState extends State<EventScreen> {
 
   void deleteNews(int index) {
     http.post(
-        Uri.parse("${MyConfig.servername}/my_memberlink_app/api/delete_event.php"),
+        Uri.parse("${MyConfig.servername}/memberlink/api/delete_event.php"),
         body: {
           "eventid": eventsList[index].eventId.toString()
         }).then((response) {
