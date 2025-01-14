@@ -50,53 +50,104 @@ if ($signed !== $data['x_signature']) {
 }
 
 // Insert or Update the database based on payment status
-if ($paidstatus === "Success") {
-    // INSERT query for successful payments
-    $query = "INSERT INTO `tbl_memberships_payments` 
-              (`memberships_name`, `users_id`, `payments_amount`, `payments_status`, `payments_billplz_id`) 
-              VALUES (?, ?, ?, ?, ?)";
+$query = "INSERT INTO `tbl_memberships_payments` 
+          (`memberships_name`, `users_id`, `payments_amount`, `payments_status`, `payments_billplz_id`) 
+          VALUES (?, ?, ?, ?, ?)";
 
-    $stmt = $conn->prepare($query);
-    if (!$stmt) {
-        error_log("Statement Preparation Failed: " . $conn->error);
-        exit("Error: Failed to prepare statement.");
-    }
-
-    // Correctly bind parameters
-    $stmt->bind_param('sidss',
-        $membershipname,   // Membership name
-        $userid,           // User ID
-        $amount,           // Payment amount
-        $paidstatus,       // Payment status
-        $payments_billplz_id // Billplz ID
-    );
-
-    if ($stmt->execute()) {
-        error_log("Payment record inserted successfully.");
-    } else {
-        error_log("Error inserting payment record: " . $stmt->error);
-        exit("Error: Failed to insert payment record.");
-    }
-
-    $stmt->close();
+$stmt = $conn->prepare($query);
+if (!$stmt) {
+    error_log("Statement Preparation Failed: " . $conn->error);
+    exit("Error: Failed to prepare statement.");
 }
+
+// Correctly bind parameters
+$stmt->bind_param('sidss',
+    $membershipname,   // Membership name
+    $userid,           // User ID
+    $amount,           // Payment amount
+    $paidstatus,       // Payment status
+    $payments_billplz_id // Billplz ID
+);
+
+if ($stmt->execute()) {
+    error_log("Payment record inserted successfully.");
+} else {
+    error_log("Error inserting payment record: " . $stmt->error);
+    exit("Error: Failed to insert payment record.");
+}
+
+$stmt->close();
 
 // Display the receipt
 echo "
 <html>
+<head>
 <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">
 <link rel=\"stylesheet\" href=\"https://www.w3schools.com/w3css/4/w3.css\">
+<style>
+    body {
+        background-color: #f3f3f3;
+        font-family: 'Harry P', sans-serif;
+    }
+    .receipt-container {
+        max-width: 600px;
+        margin: auto;
+        padding: 20px;
+        border: 2px solid #4b2e83;
+        border-radius: 10px;
+        background-color: #fff;
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+    .receipt-header {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #4b2e83;
+    }
+    .receipt-table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    .receipt-table th, .receipt-table td {
+        padding: 10px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+    .receipt-table th {
+        background-color: #4b2e83;
+        color: #fff;
+    }
+    .receipt-table tr:nth-child(even) {
+        background-color: #f2f2f2;
+    }
+    .receipt-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 14px;
+        color: #555;
+    }
+</style>
+<link href=\"https://fonts.googleapis.com/css2?family=Harry+P&display=swap\" rel=\"stylesheet\">
+</head>
 <body>
-<center><h4>Receipt</h4></center>
-<table class='w3-table w3-striped'>
-<th>Item</th><th>Description</th>
-<tr><td>Receipt</td><td>$payments_billplz_id</td></tr>
-<tr><td>Name</td><td>$name</td></tr>
-<tr><td>Email</td><td>$email</td></tr>
-<tr><td>Phone</td><td>$phone</td></tr>
-<tr><td>Paid Amount</td><td>RM $amount</td></tr>
-<tr><td>Paid Status</td><td class='$status_color'>$paidstatus</td></tr>
-</table><br>
+<div class=\"receipt-container\">
+    <div class=\"receipt-header\">
+        <h2>Payment Receipt</h2>
+        <p>Thank you for your payment!</p>
+    </div>
+    <table class='w3-table w3-striped receipt-table'>
+        <tr><th>Item</th><th>Description</th></tr>
+        <tr><td>Receipt</td><td>$payments_billplz_id</td></tr>
+        <tr><td>Name</td><td>$name</td></tr>
+        <tr><td>Email</td><td>$email</td></tr>
+        <tr><td>Phone</td><td>$phone</td></tr>
+        <tr><td>Membership</td><td>$membershipname</td></tr>
+        <tr><td>Paid Amount</td><td>RM $amount</td></tr>
+        <tr><td>Paid Status</td><td class='$status_color'>$paidstatus</td></tr>
+    </table>
+    <div class=\"receipt-footer\">
+        <p>For any inquiries, please contact us at support@memberlink.com</p>
+    </div>
+</div>
 </body>
 </html>";
 

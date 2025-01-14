@@ -1,7 +1,7 @@
 <?php
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
-error_log("Loading membership history...");
+error_log("Loading available memberships...");
 
 include_once("dbconnect.php");
 
@@ -19,29 +19,31 @@ function sendJsonResponse($sentArray) {
     echo json_encode($sentArray);
 }
 
-$userid = $_GET['users_id'];
-$sqlLoadHistory = "SELECT * FROM tbl_memberships_payments WHERE users_id = '$userid' ORDER BY payments_date DESC";
-error_log("SQL Query: " . $sqlLoadHistory);
-$result = $conn->query($sqlLoadHistory);
+$sqlLoadMemberships = "SELECT * FROM tbl_memberships ORDER BY memberships_name ASC";
+error_log("SQL Query: " . $sqlLoadMemberships);
+$result = $conn->query($sqlLoadMemberships);
 
-$history = array();
+$memberships = array();
 if ($result) {
     if ($result->num_rows > 0) {
-        $history["history"] = array();
+        $memberships["memberships"] = array();
         while ($row = $result->fetch_assoc()) {
             $record = array();
-            $record['payments_id'] = $row['payments_id'];
-            $record['payments_amount'] = $row['payments_amount'];
-            $record['payments_status'] = $row['payments_status'];
-            $record['payments_date'] = $row['payments_date'];
-            array_push($history["history"], $record);
+            $record['memberships_id'] = $row['memberships_id'];
+            $record['memberships_name'] = $row['memberships_name'];
+            $record['memberships_description'] = $row['memberships_description'];
+            $record['memberships_price'] = $row['memberships_price'];
+            $record['memberships_duration'] = $row['memberships_duration'];
+            $record['memberships_benefits'] = $row['memberships_benefits'];
+            $record['memberships_terms'] = $row['memberships_terms'];
+            array_push($memberships["memberships"], $record);
         }
-        $response = array('status' => 'success', 'data' => $history);
+        $response = array('status' => 'success', 'data' => $memberships);
     } else {
-        $response = array('status' => 'failed', 'message' => 'No membership history found', 'data' => $history);
+        $response = array('status' => 'failed', 'message' => 'No memberships found', 'data' => $memberships);
     }
 } else {
-    $response = array('status' => 'failed', 'message' => 'Database query failed', 'data' => $history);
+    $response = array('status' => 'failed', 'message' => 'Database query failed', 'data' => $memberships);
     if (is_object($conn)) {
         error_log("MySQL Error: " . $conn->error);
     } else {

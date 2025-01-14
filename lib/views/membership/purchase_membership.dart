@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:my_memberlink_app/views/membership/membership_history.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:my_memberlink_app/model/membership.dart';
-import 'package:my_memberlink_app/views/newsletter/news_screen.dart';
 import 'package:my_memberlink_app/model/user.dart';
 
 class PurchaseMembershipScreen extends StatefulWidget {
@@ -21,7 +21,7 @@ class PurchaseMembershipScreen extends StatefulWidget {
 
 class _PurchaseMembershipScreenState extends State<PurchaseMembershipScreen> {
   late WebViewController _controller;
-  late double _progress;
+  late double _progress = 0; // Initialize _progress
 
   @override
   void initState() {
@@ -101,7 +101,7 @@ class _PurchaseMembershipScreenState extends State<PurchaseMembershipScreen> {
             Navigator.push(
               context,
               MaterialPageRoute(
-                  builder: (context) => MainScreen(userdata: widget.userdata)),
+                  builder: (context) => MembershipHistoryScreen(userdata: widget.userdata)),
             );
           },
         ),

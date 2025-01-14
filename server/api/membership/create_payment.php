@@ -6,6 +6,7 @@ $phone = $_GET['users_phone'];
 $name = $_GET['users_lastname']; 
 $userid = $_GET['users_id'];
 $amount = $_GET['payments_amount']; 
+$membershipname = $_GET['memberships_name'];
 
 
 $api_key = '1c6abab1-45ae-4c0b-88ac-38200e661286';
@@ -18,9 +19,10 @@ $data = array(
           'mobile' => $phone,
           'name' => $name,
           'amount' => ($amount) * 100, // RM20
+          'membership name' => $membershipname,
           'description' => 'Payment for order by '.$name,
           'callback_url' => "https://humancc.site/irdinabalqis/memberlink/api/return_url",
-          'redirect_url' => "https://humancc.site/irdinabalqis/memberlink/api/update_payment.php?users_id=$userid&users_email=$email&users_phone=$phone&payments_amount=$amount&users_lastname=$name" 
+          'redirect_url' => "https://humancc.site/irdinabalqis/memberlink/api/update_payment.php?users_email=$email&users_phone=$phone&users_lastname=$name&users_id=$userid&payments_amount=$amount&memberships_name=$membershipname" 
 );
 
 $process = curl_init($host );

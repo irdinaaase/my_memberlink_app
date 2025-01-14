@@ -47,8 +47,8 @@ class _ProductScreenState extends State<ProductScreen> {
                 top: 20), // Adjust the top padding as needed
             child: ClipOval(
               child: Image.asset(
-                'assets/icons/head.png', // Replace with your image path
-                height: 60, // Set the desired height
+                'assets/icons/head.png', 
+                height: 60, 
                 fit: BoxFit.cover,
               ),
             ),
